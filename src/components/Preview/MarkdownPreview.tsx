@@ -20,7 +20,7 @@ const components: Components = {
     }
     // 行内代码
     return (
-      <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-[0.85em] text-gray-800" {...props}>
+      <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-[0.85em] text-gray-800 dark:bg-gray-800 dark:text-gray-200" {...props}>
         {children}
       </code>
     );
@@ -29,13 +29,15 @@ const components: Components = {
 
 function MarkdownPreviewImpl({ content }: MarkdownPreviewProps) {
   return (
-    <div className="markdown-body h-full overflow-y-auto bg-white p-6">
+    <div className="markdown-body print-area h-full overflow-y-auto bg-white p-6 dark:bg-gray-900">
       {content ? (
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
           {content}
         </ReactMarkdown>
       ) : (
-        <p className="text-sm text-gray-400">预览区域为空，在左侧编辑器输入内容即可实时预览。</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">
+          预览区域为空，在左侧编辑器输入内容即可实时预览。
+        </p>
       )}
     </div>
   );

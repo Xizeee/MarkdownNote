@@ -190,3 +190,98 @@ body {
 .markdown-body del {
   color: #9ca3af;
 }
+
+/* ===== 暗色主题：.dark 下的 markdown-body 排版 ===== */
+.dark .markdown-body {
+  color: #e5e7eb;
+}
+.dark .markdown-body h1,
+.dark .markdown-body h2 {
+  border-bottom-color: #374151;
+}
+.dark .markdown-body h6 {
+  color: #9ca3af;
+}
+.dark .markdown-body a {
+  color: #7fbffc;
+}
+.dark .markdown-body blockquote {
+  color: #9ca3af;
+  border-left-color: #4b5563;
+  background: #1f2937;
+}
+.dark .markdown-body th {
+  background: #1f2937;
+}
+.dark .markdown-body th,
+.dark .markdown-body td {
+  border-color: #374151;
+}
+.dark .markdown-body tr:nth-child(2n) {
+  background: #1f2937;
+}
+.dark .markdown-body del {
+  color: #6b7280;
+}
+
+/* 暗色滚动条 */
+.dark *::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* ===== 打印 / 导出 PDF：仅显示预览区，隐藏其余 UI ===== */
+@media print {
+  /* 隐藏所有元素，但保留布局占位以避免错位 */
+  body * {
+    visibility: hidden;
+  }
+  /* 仅预览区及其后代可见，并绝对定位到页面左上全宽 */
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+  }
+  /* 暗色主题打印时，正文文字强制深色（代码块保留自身深色背景与彩色 token） */
+  .dark .print-area {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+  }
+  .dark .print-area .markdown-body {
+    color: #1f2937 !important;
+  }
+  .dark .print-area h1,
+  .dark .print-area h2 {
+    border-bottom-color: #e5e7eb !important;
+  }
+  .dark .print-area blockquote {
+    color: #6b7280 !important;
+    border-left-color: #d1d5db !important;
+    background: #f9fafb !important;
+  }
+  .dark .print-area th {
+    background: #f3f4f6 !important;
+  }
+  .dark .print-area th,
+  .dark .print-area td {
+    border-color: #e5e7eb !important;
+  }
+  .dark .print-area tr:nth-child(2n) {
+    background: #f9fafb !important;
+  }
+  /* 明确标记不打印的元素直接移除占位 */
+  .no-print {
+    display: none !important;
+  }
+}

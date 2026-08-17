@@ -59,17 +59,16 @@ export function AppLayout({ list, editor, preview }: AppLayoutProps) {
   }, []);
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden bg-gray-50 text-gray-800">
+    <div className="relative flex h-screen w-screen overflow-hidden bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100">
       {/* 左侧：笔记列表 */}
       <aside
         className={`
-          shrink-0 overflow-hidden border-r border-gray-200 bg-white transition-all duration-200 ease-in-out
+          shrink-0 overflow-hidden border-r border-gray-200 bg-white transition-all duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900
           ${isListCollapsed
             ? 'w-0 md:w-12'
             : 'absolute inset-y-0 left-0 z-30 w-full shadow-lg md:static md:z-auto md:shadow-none'}
         `}
-        style={isListCollapsed ? undefined : { width: undefined, flex: `0 0 ${listWidth}px` }}
-        data-collapsed={isListCollapsed}
+        style={isListCollapsed ? undefined : { flex: `0 0 ${listWidth}px` }}
       >
         {/* 移动端展开列表时覆盖整屏，列表内部自带关闭按钮 */}
         {list}
@@ -80,7 +79,7 @@ export function AppLayout({ list, editor, preview }: AppLayoutProps) {
         <button
           type="button"
           onClick={toggleListCollapsed}
-          className="absolute left-12 top-1/2 z-20 hidden -translate-y-1/2 rounded-r border border-l-0 border-gray-200 bg-white px-1 py-5 text-gray-500 shadow hover:bg-gray-50 hover:text-gray-700 md:block"
+          className="absolute left-12 top-1/2 z-20 hidden -translate-y-1/2 rounded-r border border-l-0 border-gray-200 bg-white px-1 py-5 text-gray-500 shadow transition hover:bg-gray-50 hover:text-gray-700 md:block dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
           aria-label="展开笔记列表"
           title="展开列表"
         >
@@ -96,7 +95,7 @@ export function AppLayout({ list, editor, preview }: AppLayoutProps) {
         ref={containerRef}
         className="flex flex-1 flex-col overflow-hidden md:flex-row"
       >
-        <section className="flex-1 overflow-hidden border-b border-gray-200 bg-white md:border-b-0 md:border-r">
+        <section className="flex-1 overflow-hidden border-b border-gray-200 bg-white md:border-b-0 md:border-r dark:border-gray-700 dark:bg-gray-900">
           {editor}
         </section>
 
@@ -104,7 +103,7 @@ export function AppLayout({ list, editor, preview }: AppLayoutProps) {
         <ResizeHandle onDrag={onEditorPreviewDrag} orientation="vertical" />
 
         <section
-          className="flex-1 overflow-hidden bg-white md:flex-none"
+          className="flex-1 overflow-hidden bg-white md:flex-none dark:bg-gray-900"
           style={
             previewWidth !== null
               ? { width: `${previewWidth}px`, flex: 'none' }

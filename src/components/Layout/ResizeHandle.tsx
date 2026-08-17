@@ -54,7 +54,7 @@ export function ResizeHandle({ onDrag, orientation }: ResizeHandleProps) {
       role="separator"
       aria-orientation={orientation}
       onMouseDown={handleMouseDown}
-      className="hidden w-1 shrink-0 cursor-col-resize bg-gray-200 transition-colors hover:bg-brand-400 md:block"
+      className="hidden w-1 shrink-0 cursor-col-resize bg-gray-200 transition-colors hover:bg-brand-400 md:block dark:bg-gray-700 dark:hover:bg-brand-600"
     />
   );
 }

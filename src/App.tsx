@@ -11,7 +11,7 @@ interface EmptyStateProps {
 
 function EmptyState({ message }: EmptyStateProps) {
   return (
-    <div className="flex h-full items-center justify-center bg-white p-6 text-center text-sm text-gray-400">
+    <div className="flex h-full items-center justify-center bg-white p-6 text-center text-sm text-gray-400 dark:bg-gray-900 dark:text-gray-500">
       {message}
     </div>
   );

@@ -54,6 +54,21 @@ export function downloadMarkdownFile(title: string, content: string): void {
   URL.revokeObjectURL(url);
 }
 
+// 打印为 PDF：借助浏览器"另存为 PDF"能力，无需第三方依赖
+// 打印前临时设置 document.title，使浏览器默认 PDF 文件名取笔记标题
+export function printToPdf(title: string): void {
+  const prevTitle = document.title;
+  document.title = title;
+  const restore = () => {
+    document.title = prevTitle;
+    window.removeEventListener('afterprint', restore);
+  };
+  window.addEventListener('afterprint', restore);
+  window.print();
+  // 兜底：部分浏览器不触发 afterprint
+  window.setTimeout(restore, 2000);
+}
+
 // ===== Markdown 格式化（快捷键 / 工具栏共用，纯函数便于测试）=====
 
 export type FormatType =

@@ -31,8 +31,8 @@ export function NoteList() {
   return (
     <div className="flex h-full flex-col">
       {/* 顶部标题栏 */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2.5">
-        <h2 className="text-sm font-semibold text-gray-700">笔记</h2>
+      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2.5 dark:border-gray-700">
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">笔记</h2>
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -49,7 +49,7 @@ export function NoteList() {
           <button
             type="button"
             onClick={toggleListCollapsed}
-            className="hidden rounded-md p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 md:block"
+            className="hidden rounded-md p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 md:block dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             aria-label={isListCollapsed ? '展开列表' : '收起列表'}
             title={isListCollapsed ? '展开列表' : '收起列表'}
           >
@@ -62,7 +62,7 @@ export function NoteList() {
       <button
         type="button"
         onClick={toggleListCollapsed}
-        className="absolute right-2 top-2 z-40 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 md:hidden"
+        className="absolute right-2 top-2 z-40 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 md:hidden dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
         aria-label="关闭列表"
       >
         ✕
@@ -76,7 +76,7 @@ export function NoteList() {
       {/* 笔记列表 */}
       <ul className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-2">
         {filteredNotes.length === 0 ? (
-          <li className="px-2 py-8 text-center text-sm text-gray-400">
+          <li className="px-2 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
             {searchQuery ? '没有匹配的笔记' : '暂无笔记，点击「新建」开始'}
           </li>
         ) : (

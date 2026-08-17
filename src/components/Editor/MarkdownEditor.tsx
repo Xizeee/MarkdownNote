@@ -122,7 +122,7 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
   );
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-white dark:bg-gray-900">
       <Toolbar onFormat={formatText} />
       <textarea
         ref={textareaRef}
@@ -131,7 +131,7 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
         onKeyDown={handleKeyDown}
         spellCheck={false}
         placeholder={'在此输入 Markdown 内容...\n支持标题、列表、引用、代码块、表格等 GFM 语法'}
-        className="flex-1 resize-none bg-white p-4 font-mono text-sm leading-6 text-gray-800 outline-none placeholder:text-gray-300"
+        className="flex-1 resize-none bg-white p-4 font-mono text-sm leading-6 text-gray-800 outline-none placeholder:text-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-600"
         aria-label="Markdown 编辑器"
       />
     </div>
