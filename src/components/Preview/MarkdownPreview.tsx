@@ -2,6 +2,7 @@ import { memo } from 'react';
 import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
+import { TableOfContents } from './TableOfContents';
 
 interface MarkdownPreviewProps {
   /** Markdown 内容（已由编辑器防抖写入全局状态） */
@@ -36,16 +37,19 @@ const components: Components = {
 
 function MarkdownPreviewImpl({ content }: MarkdownPreviewProps) {
   return (
-    <div className="markdown-body print-area h-full overflow-y-auto bg-white p-6 dark:bg-gray-900">
-      {content ? (
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={urlTransform}>
-          {content}
-        </ReactMarkdown>
-      ) : (
-        <p className="text-sm text-gray-400 dark:text-gray-500">
-          预览区域为空，在左侧编辑器输入内容即可实时预览。
-        </p>
-      )}
+    <div className="flex h-full flex-col bg-white dark:bg-gray-900">
+      {content && <TableOfContents content={content} />}
+      <div className="markdown-body print-area h-full overflow-y-auto p-6 dark:bg-gray-900">
+        {content ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={urlTransform}>
+            {content}
+          </ReactMarkdown>
+        ) : (
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            预览区域为空，在左侧编辑器输入内容即可实时预览。
+          </p>
+        )}
+      </div>
     </div>
   );
 }

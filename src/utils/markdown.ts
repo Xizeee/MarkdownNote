@@ -209,3 +209,49 @@ export function applyFormat(
       return { text, selectionStart: start, selectionEnd: end };
   }
 }
+
+// 目录标题项
+export interface TocHeading {
+  level: number; // 1-6
+  text: string;
+  index: number; // 标题在文档中的序号，用于定位 DOM 中第几个标题元素
+}
+
+// 解析 Markdown 标题（ATX 风格 #），跳过代码围栏内的 # 行
+// index 与 react-markdown 渲染出的 <h1>-<h6> DOM 顺序一致，用于点击跳转
+export function parseHeadings(content: string): TocHeading[] {
+  const headings: TocHeading[] = [];
+  const lines = content.split('\n');
+  let inFence = false;
+  let fenceChar = '';
+  let idx = 0;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // 代码围栏：3 个及以上 ` 或 ~
+    const fence = /^(`{3,}|~{3,})/.exec(trimmed);
+    if (fence) {
+      const ch = fence[1][0];
+      if (!inFence) {
+        inFence = true;
+        fenceChar = ch;
+      } else if (ch === fenceChar) {
+        inFence = false;
+        fenceChar = '';
+      }
+      continue;
+    }
+    if (inFence) continue;
+    // ATX 标题：1-6 个 # 后跟空格
+    const heading = /^(#{1,6})\s+(.+?)\s*#*$/.exec(trimmed);
+    if (heading) {
+      const level = heading[1].length;
+      // 去掉行内强调/代码标记，链接 [text](url) 取 text，用于目录纯文本显示
+      const text = heading[2]
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+        .replace(/[*_`~\[\]]/g, '')
+        .trim();
+      headings.push({ level, text, index: idx++ });
+    }
+  }
+  return headings;
+}
