@@ -1,33 +1,93 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { useNotes } from '../../hooks/useNotes';
-import { formatTime } from '../../utils/markdown';
+import { downloadMarkdownFile, formatTime, type FormatType } from '../../utils/markdown';
 
-// 编辑器顶部信息条：展示当前笔记标题、字数与更新时间（只读）
-// 作为 PRD 4.3「预留工具栏组件位置」的实现，不引入未提及的编辑操作
-function ToolbarImpl() {
+interface ToolbarProps {
+  onFormat: (type: FormatType) => void;
+}
+
+interface FormatButton {
+  type: FormatType;
+  label: string;
+  title: string;
+  className?: string;
+}
+
+// 格式按钮配置（label + title 含快捷键提示）
+const FORMAT_BUTTONS: FormatButton[] = [
+  { type: 'bold', label: 'B', title: '加粗 (Ctrl+B)', className: 'font-bold' },
+  { type: 'italic', label: 'I', title: '斜体 (Ctrl+I)', className: 'italic' },
+  { type: 'code', label: 'Code', title: '行内代码 (Ctrl+K)' },
+  { type: 'h1', label: 'H1', title: '一级标题 (Ctrl+1)' },
+  { type: 'h2', label: 'H2', title: '二级标题 (Ctrl+2)' },
+  { type: 'h3', label: 'H3', title: '三级标题 (Ctrl+3)' },
+  { type: 'quote', label: '“', title: '引用 (Ctrl+Shift+Q)' },
+  { type: 'ul', label: '•', title: '无序列表 (Ctrl+Shift+U)' },
+  { type: 'ol', label: '1.', title: '有序列表 (Ctrl+Shift+O)' },
+  { type: 'link', label: '链接', title: '链接 (Ctrl+L)' },
+  { type: 'codeblock', label: '```', title: '代码块 (Ctrl+Shift+K)', className: 'font-mono' }
+];
+
+// 编辑器工具栏：格式按钮 + 当前笔记信息 + 导出按钮
+function ToolbarImpl({ onFormat }: ToolbarProps) {
   const { activeNote } = useNotes();
+
+  const handleExport = useCallback(() => {
+    if (activeNote) {
+      downloadMarkdownFile(activeNote.title, activeNote.content);
+    }
+  }, [activeNote]);
 
   if (!activeNote) {
     return (
-      <div className="flex items-center border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-400">
+      <div className="border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-400">
         未选择笔记
       </div>
     );
   }
 
   const charCount = activeNote.content.length;
-  const lineCount = activeNote.content ? activeNote.content.split('\n').length : 0;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500">
-      <span className="truncate font-medium text-gray-600">
-        {activeNote.title || '无标题'}
-      </span>
-      <span className="flex shrink-0 items-center gap-3">
-        <span>{charCount} 字符</span>
-        <span className="hidden sm:inline">{lineCount} 行</span>
-        <span className="hidden sm:inline">已保存 · {formatTime(activeNote.updatedAt)}</span>
-      </span>
+    <div className="border-b border-gray-200 bg-gray-50">
+      {/* 第一行：格式按钮 + 导出 */}
+      <div className="flex items-center gap-0.5 px-2 py-1">
+        {FORMAT_BUTTONS.map(btn => (
+          <button
+            key={btn.type}
+            type="button"
+            onClick={() => onFormat(btn.type)}
+            title={btn.title}
+            className={`min-w-[1.5rem] rounded px-1.5 py-1 text-xs text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 ${btn.className ?? ''}`}
+          >
+            {btn.label}
+          </button>
+        ))}
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={handleExport}
+          title="导出为 .md 文件"
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-200 hover:text-gray-900"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          导出
+        </button>
+      </div>
+      {/* 第二行：笔记信息 */}
+      <div className="flex items-center justify-between gap-3 px-3 pb-1 text-xs text-gray-500">
+        <span className="truncate font-medium text-gray-600">
+          {activeNote.title || '无标题'}
+        </span>
+        <span className="flex shrink-0 items-center gap-3">
+          <span>{charCount} 字</span>
+          <span className="hidden sm:inline">已保存 · {formatTime(activeNote.updatedAt)}</span>
+        </span>
+      </div>
     </div>
   );
 }

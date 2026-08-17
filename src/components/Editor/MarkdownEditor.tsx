@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
+import { applyFormat, type FormatType } from '../../utils/markdown';
 import { Toolbar } from './Toolbar';
 
 interface MarkdownEditorProps {
@@ -42,40 +43,94 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
     setLocal(e.target.value);
   }, []);
 
-  // Tab 键插入两空格缩进（PRD 2.2 可选快捷键）
+  // 在下一帧恢复光标选区并聚焦（setLocal 后 DOM 更新完成）
+  const restoreSelection = useCallback((start: number, end: number) => {
+    requestAnimationFrame(() => {
+      const t = textareaRef.current;
+      if (t) {
+        t.selectionStart = start;
+        t.selectionEnd = end;
+        t.focus();
+      }
+    });
+  }, []);
+
+  // 应用 Markdown 格式化（快捷键与工具栏按钮共用入口）
+  // 通过 textareaRef 读取 DOM 当前值，避免依赖 local state，保持引用稳定
+  const formatText = useCallback((type: FormatType) => {
+    const t = textareaRef.current;
+    if (!t) return;
+    const result = applyFormat(type, t.value, t.selectionStart, t.selectionEnd);
+    setLocal(result.text);
+    restoreSelection(result.selectionStart, result.selectionEnd);
+  }, [restoreSelection]);
+
+  // 快捷键：Ctrl/Cmd 组合键触发格式化；Tab 缩进、Shift+Tab 反缩进
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      const mod = e.ctrlKey || e.metaKey;
+
+      // Tab / Shift+Tab 缩进
       if (e.key === 'Tab') {
         e.preventDefault();
-        const target = e.currentTarget;
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-        const indent = '  ';
-        const next = local.slice(0, start) + indent + local.slice(end);
-        setLocal(next);
-        // 下一帧恢复光标位置
-        requestAnimationFrame(() => {
-          if (textareaRef.current) {
-            const pos = start + indent.length;
-            textareaRef.current.selectionStart = pos;
-            textareaRef.current.selectionEnd = pos;
+        const t = e.currentTarget;
+        const value = t.value;
+        const start = t.selectionStart;
+        if (e.shiftKey) {
+          // 反缩进：去除光标所在行行首最多 2 个空格
+          const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+          const head = value.slice(lineStart, lineStart + 2);
+          const removeLen = head.startsWith('  ') ? 2 : head.startsWith(' ') ? 1 : 0;
+          if (removeLen > 0) {
+            const next = value.slice(0, lineStart) + value.slice(lineStart + removeLen);
+            setLocal(next);
+            restoreSelection(Math.max(lineStart, start - removeLen), Math.max(lineStart, start - removeLen));
           }
-        });
+        } else {
+          // 缩进：光标处插入两个空格
+          const indent = '  ';
+          const end = t.selectionEnd;
+          const next = value.slice(0, start) + indent + value.slice(end);
+          setLocal(next);
+          restoreSelection(start + indent.length, start + indent.length);
+        }
+        return;
+      }
+
+      if (!mod) return;
+
+      const key = e.key.toLowerCase();
+      let type: FormatType | null = null;
+      if (key === 'b') type = 'bold';
+      else if (key === 'i') type = 'italic';
+      else if (key === 'k' && !e.shiftKey) type = 'code';
+      else if (key === 'k' && e.shiftKey) type = 'codeblock';
+      else if (key === '1') type = 'h1';
+      else if (key === '2') type = 'h2';
+      else if (key === '3') type = 'h3';
+      else if (key === 'l') type = 'link';
+      else if (key === 'q' && e.shiftKey) type = 'quote';
+      else if (key === 'u' && e.shiftKey) type = 'ul';
+      else if (key === 'o' && e.shiftKey) type = 'ol';
+
+      if (type) {
+        e.preventDefault();
+        formatText(type);
       }
     },
-    [local]
+    [formatText, restoreSelection]
   );
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <Toolbar />
+      <Toolbar onFormat={formatText} />
       <textarea
         ref={textareaRef}
         value={local}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         spellCheck={false}
-        placeholder="在此输入 Markdown 内容...&#10;支持标题、列表、引用、代码块、表格等 GFM 语法"
+        placeholder={'在此输入 Markdown 内容...\n支持标题、列表、引用、代码块、表格等 GFM 语法'}
         className="flex-1 resize-none bg-white p-4 font-mono text-sm leading-6 text-gray-800 outline-none placeholder:text-gray-300"
         aria-label="Markdown 编辑器"
       />
