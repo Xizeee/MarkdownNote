@@ -5,6 +5,7 @@ import { ThemeToggle } from '../ThemeToggle';
 
 interface ToolbarProps {
   onFormat: (type: FormatType) => void;
+  onInsertImage: () => void;
 }
 
 interface FormatButton {
@@ -29,8 +30,8 @@ const FORMAT_BUTTONS: FormatButton[] = [
   { type: 'codeblock', label: '```', title: '代码块 (Ctrl+Shift+K)', className: 'font-mono' }
 ];
 
-// 编辑器工具栏：格式按钮 + 主题切换 + 当前笔记信息 + 导出（MD / PDF）
-function ToolbarImpl({ onFormat }: ToolbarProps) {
+// 编辑器工具栏：格式按钮 + 图片 + 主题切换 + 当前笔记信息 + 导出（MD / PDF）
+function ToolbarImpl({ onFormat, onInsertImage }: ToolbarProps) {
   const { activeNote } = useNotes();
 
   const handleExport = useCallback(() => {
@@ -71,6 +72,28 @@ function ToolbarImpl({ onFormat }: ToolbarProps) {
             {btn.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={onInsertImage}
+          title="插入图片"
+          className="flex items-center rounded px-1.5 py-1 text-xs text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        </button>
         <div className="flex-1" />
         <ThemeToggle />
         <button

@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { applyFormat, type FormatType } from '../../utils/markdown';
+import { ImageInsertDialog } from '../Modal/ImageInsertDialog';
 import { Toolbar } from './Toolbar';
 
 interface MarkdownEditorProps {
@@ -17,6 +18,7 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
   const [local, setLocal] = useState(content);
   const debounced = useDebounce(local, 200);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   // content 变化时同步本地：仅当 content 与 debounced 不同（外部切换笔记）时同步；
   // onChange 回流时 content === debounced，不覆盖用户最新输入
@@ -64,6 +66,26 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
     setLocal(result.text);
     restoreSelection(result.selectionStart, result.selectionEnd);
   }, [restoreSelection]);
+
+  // 在光标处插入文本（用于图片插入）
+  const insertText = useCallback((text: string) => {
+    const t = textareaRef.current;
+    if (!t) return;
+    const start = t.selectionStart;
+    const end = t.selectionEnd;
+    const next = t.value.slice(0, start) + text + t.value.slice(end);
+    setLocal(next);
+    restoreSelection(start + text.length, start + text.length);
+  }, [restoreSelection]);
+
+  // 打开图片插入弹窗（稳定引用，避免 Toolbar 因 prop 变化重渲染）
+  const openImageDialog = useCallback(() => setImageDialogOpen(true), []);
+
+  // 图片插入弹窗确认后回调
+  const handleImageInsert = useCallback((markdown: string) => {
+    setImageDialogOpen(false);
+    insertText(markdown);
+  }, [insertText]);
 
   // 快捷键：Ctrl/Cmd 组合键触发格式化；Tab 缩进、Shift+Tab 反缩进
   const handleKeyDown = useCallback(
@@ -123,7 +145,7 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-gray-900">
-      <Toolbar onFormat={formatText} />
+      <Toolbar onFormat={formatText} onInsertImage={openImageDialog} />
       <textarea
         ref={textareaRef}
         value={local}
@@ -134,6 +156,12 @@ function MarkdownEditorImpl({ content, onChange, autoFocusKey }: MarkdownEditorP
         className="flex-1 resize-none bg-white p-4 font-mono text-sm leading-6 text-gray-800 outline-none placeholder:text-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-600"
         aria-label="Markdown 编辑器"
       />
+      {imageDialogOpen && (
+        <ImageInsertDialog
+          onInsert={handleImageInsert}
+          onCancel={() => setImageDialogOpen(false)}
+        />
+      )}
     </div>
   );
 }

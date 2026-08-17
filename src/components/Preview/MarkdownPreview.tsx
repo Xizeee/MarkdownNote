@@ -1,11 +1,18 @@
 import { memo } from 'react';
-import ReactMarkdown, { type Components } from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
 
 interface MarkdownPreviewProps {
   /** Markdown 内容（已由编辑器防抖写入全局状态） */
   content: string;
+}
+
+// 自定义 URL 转换：放行 data:image/* 协议（base64 嵌入图片），其余用默认安全过滤
+// 默认 urlTransform 会把 data: 协议 rebased 成相对路径导致图片无法渲染
+function urlTransform(url: string): string {
+  if (url.startsWith('data:image/')) return url;
+  return defaultUrlTransform(url);
 }
 
 // 自定义渲染器：代码块使用 CodeBlock 进行语法高亮
@@ -31,7 +38,7 @@ function MarkdownPreviewImpl({ content }: MarkdownPreviewProps) {
   return (
     <div className="markdown-body print-area h-full overflow-y-auto bg-white p-6 dark:bg-gray-900">
       {content ? (
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={urlTransform}>
           {content}
         </ReactMarkdown>
       ) : (
